@@ -13,6 +13,9 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 
+from django.contrib import messages
+from django.core.mail import EmailMessage
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -76,7 +79,12 @@ TEMPLATES = [
         },
     },
 ]
-
+MESSAGE_TAGS = {
+    messages.INFO: "info",
+    messages.ERROR: 'danger',
+    messages.SUCCESS: 'success',
+    messages.WARNING: 'warning',
+}
 WSGI_APPLICATION = 'GreatKart.wsgi.application'
 
 AUTH_USER_MODEL = 'accounts.Account'
@@ -137,3 +145,22 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_REDIRECT_URL = 'accounts:dashboard'
+
+# SMTP setting
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# DEFAULT_FROM_EMAIL = "uzoigweiroh@gmail.com"
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_HOST_USER = 'uzoigweiroh@gmail.com'
+# EMAIL_HOST_PASSWORD = 'dddxvutttqcepvbv'
+# EMAIL_USE_TLS = True
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+DEFAULT_FROM_EMAIL = "uzoigweiroh@outlook.com"
+EMAIL_HOST = 'smtp-mail.outlook.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'uzoigweiroh@outlook.com'
+EMAIL_HOST_PASSWORD = 'admission2024'
+EMAIL_USE_TLS = True
