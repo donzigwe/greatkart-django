@@ -8,6 +8,7 @@ from carts.views import _cart_id
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 
 
+
 # Create your views here.
 
 
@@ -55,8 +56,10 @@ def search(request):
             products = Product.objects.order_by('-created_date').filter((Q(product_name__icontains=keyword)) |
                                                                         Q(product_description__icontains=keyword))
             products_counts = products.count()
-    context = {
-        'products': products,
-        'product_count': products_counts,
-    }
+        context = {
+            'products': products,
+            'product_count': products_counts,
+        }
     return render(request, 'store/store.html', context)
+
+

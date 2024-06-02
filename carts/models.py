@@ -2,6 +2,7 @@ from django.db import models
 
 
 
+
 # Create your models here.
 class Cart(models.Model):
     cart_id = models.CharField(max_length=250, blank=True)
@@ -12,7 +13,8 @@ class Cart(models.Model):
 
 
 class CartItem(models.Model):
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+    user = models.ForeignKey('accounts.Account', on_delete=models.CASCADE, null=True)
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, null=True)
     product = models.ForeignKey('store.Product', on_delete=models.CASCADE)
     variations = models.ManyToManyField('store.Variation', blank=True)
     quantity = models.IntegerField()

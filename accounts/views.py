@@ -9,9 +9,12 @@ from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+import requests
 
-from .forms import RegistrationForm, ResetPasswordForm, ForgotPasswordForm1, LoginForm
-from .models import Account
+from .forms import RegistrationForm, ResetPasswordForm, ForgotPasswordForm1, LoginForm, ChangePasswordForm
+from accounts.models import Account
+from carts.models import Cart, CartItem
+from carts.views import _cart_id
 
 
 # Create your views here.
@@ -70,9 +73,51 @@ def login(request):
             password = form.cleaned_data['password']
             user = auth.authenticate(email=email, password=password)
             if user is not None:
+                try:
+                    cart_obj = Cart.objects.get(cart_id=_cart_id(request))
+                    is_cart_item_exists = CartItem.objects.filter(cart=cart_obj).exists()
+                    if is_cart_item_exists:
+                        # Filter by cart_id
+                        cart_items = CartItem.objects.filter(cart=cart_obj)
+                        product_variations_list = []
+                        for item in cart_items:
+                            product_variation = item.variations.all()
+                            product_variations_list.append(list(product_variation))
+                        # Filter by logged in user
+                        cart_items_user = CartItem.objects.filter(user=user)
+                        existing_variations_list = []
+                        id = []
+                        for item in cart_items_user:
+                            existing_variations = item.variations.all()
+                            existing_variations_list.append(list(existing_variations))
+                            id.append(item.id)
+                        for pr in product_variations_list:
+                            if pr in existing_variations_list:
+                                index = existing_variations_list.index(pr)
+                                item_id = id[index]
+                                item = CartItem.objects.get(id=item_id)
+                                item.quantity += 1
+                                item.user = user
+                                item.save()
+                            else:
+                                for item in cart_items:
+                                    item.user = user
+                                    item.save()
+                except ObjectDoesNotExist:
+                    pass
                 auth.login(request, user)
                 messages.success(request, 'login successful')
-                return redirect("accounts:dashboard")
+                url = request.META.get('HTTP_REFERER')
+                try:
+                    query = requests.utils.urlparse(url).query
+                    params = dict(x.split('=') for x in query.split('&'))
+                    print(params)
+                    if 'next' in params:
+                        next_page = params['next']
+                        print(next_page)
+                        return redirect(next_page)
+                except:
+                    return redirect("accounts:dashboard")
             else:
                 messages.error(request, 'Invalid login credentials!')
                 return redirect('accounts:login')
@@ -81,7 +126,7 @@ def login(request):
                 messages.error(request, error)
     else:
         form = LoginForm()
-        context = {'form': form}
+    context = {'form': form}
     return render(request, 'accounts/login.html', context)
 
 
@@ -193,3 +238,34 @@ def reset_password(request):
         form = ResetPasswordForm()
     context = {'form': form}
     return render(request, 'accounts/reset_password.html', context)
+
+
+@login_required(login_url='accounts:login')
+def change_password(request):
+    if request.method == "POST":
+        form = ChangePasswordForm(request.POST)
+        if form.is_valid():
+            print('form is valid')
+            current_password = form.cleaned_data['current_password']
+            new_password = form.cleaned_data['new_password']
+            try:
+                user = request.user
+            except ObjectDoesNotExist:
+                print('ObjectDoesNotExist')
+                messages.error(request, "You're logged out, login to change your password.")
+                return redirect('accounts:login')
+            if user.check_password(current_password):
+                user.set_password(new_password)
+                user.save()
+                messages.success(request, 'Password reset was successful!')
+                return redirect('accounts:dashboard')
+            else:
+                messages.error(request, 'Current password is incorrect')
+                return redirect('accounts:change_password')
+        else:
+            for error in list(form.errors.values()):
+                messages.error(request, error)
+    else:
+        form = ChangePasswordForm()
+    context = {'form': form}
+    return render(request, 'accounts/change_password.html', context)

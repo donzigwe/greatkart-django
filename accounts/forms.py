@@ -60,7 +60,30 @@ class ResetPasswordForm(forms.Form):
                 'Passwords does not match!'
             )
 
+
 class ForgotPasswordForm1(forms.Form):
     email = forms.EmailField(widget=forms.EmailInput(attrs={
         'placeholder': 'Enter Email', 'class': 'form-control',
     }))
+
+
+class ChangePasswordForm(forms.Form):
+    current_password = forms.CharField(widget=forms.PasswordInput(attrs={
+        'placeholder': 'Enter Current Password', 'class': 'form-control',
+    }))
+    new_password = forms.CharField(widget=forms.PasswordInput(attrs={
+        'placeholder': 'Enter New Password', 'class': 'form-control',
+    }))
+    confirm_new_password = forms.CharField(widget=forms.PasswordInput(attrs={
+        'placeholder': 'Enter New Password Again', 'class': 'form-control',
+    }))
+
+    def clean(self):
+        clean_data = super(ChangePasswordForm, self).clean()
+        new_password = clean_data.get('new_password')
+        confirm_new_password = clean_data.get('confirm_new_password')
+
+        if new_password != confirm_new_password:
+            raise forms.ValidationError(
+                'Passwords does not match!'
+            )
