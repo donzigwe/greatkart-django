@@ -4,7 +4,7 @@ from .models import Cart, CartItem
 from store.models import Product,Variation
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
-from .forms import BillingForm
+from .forms import OrderForm
 
 
 
@@ -204,7 +204,7 @@ def checkout(request, total=0, quantity=0, cart_items=0):
         grand_total = tax + total
     except ObjectDoesNotExist:
         pass
-    form = BillingForm()
+    form = OrderForm()
     context = {
         'cart_items': cart_items,
         'total': total,

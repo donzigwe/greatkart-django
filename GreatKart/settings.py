@@ -40,6 +40,10 @@ INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
     'store.apps.StoreConfig',
     'carts.apps.CartsConfig',
+    'orders.apps.OrdersConfig',
+
+    # Installed apps.
+    'paypal.standard.ipn',
 
     # Django Apps
     'django.contrib.admin',
@@ -164,3 +168,9 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'uzoigweiroh@outlook.com'
 EMAIL_HOST_PASSWORD = 'admission2024'
 EMAIL_USE_TLS = True
+
+# Paypal
+PAYPAL_TEST = True
+PAYPAL_CLIENT_ID = 'Aekx5O_um8obZ_utPvAHMZ3TN4mT2TbA870ERdGS4dYhGMDhAM7XRHrMsGn9UktuxzpleQF5VWYyTDVC'
+PAYPAL_SECRET = 'EIpkqj56SZ-Vaftfm2ufQOSq5oMPT3Ghodp49h4RFu6DHHq4FfWcBGth89NVJYsB-SVcytmQ5ETROvjp'
+PAYPAL_RECEIVER_EMAIL = 'uzoheaven@gmail.com'

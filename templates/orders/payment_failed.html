@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Payment Failed</h1>
+    <h1>{{ order.order_number }}</h1>
+    <p>Hi, {{ order.first_name }}</p>
+    <p>Your payment was not completed. Please try again.</p>
+
+{% endblock %}
