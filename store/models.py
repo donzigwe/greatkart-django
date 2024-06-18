@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Avg, Count
 from django.urls import reverse
 
 
@@ -21,13 +22,28 @@ class Product(models.Model):
     def get_url(self):
         return reverse('store:product_details', args=[self.category.slug, self.slug])
 
+    def average_rating(self):
+        reviews = ReviewRating.objects.filter(product=self, status=True).aggregate(average=Avg('rating'))
+        avg = 0
+        if reviews['average'] is not None:
+            avg = float(reviews['average'])
+        return avg
 
-class  VariationManager(models.Manager):
+    def count_reviews(self):
+        reviews = ReviewRating.objects.filter(product=self, status=True).aggregate(count=Count('id'))
+        count = 0
+        if reviews['count'] is not None:
+            count = int(reviews['count'])
+        return count
+
+
+class VariationManager(models.Manager):
     def colors(self):
         return super(VariationManager, self).filter(variation_category="color", is_active=True)
 
     def sizes(self):
         return super(VariationManager, self).filter(variation_category='size', is_active=True)
+
 
 variation_category_choice = (
     ('color', 'color'),
@@ -47,3 +63,18 @@ class Variation(models.Model):
     def __str__(self):
         # return f'{self.variation_category} {self.variation_value}'
         return self.variation_value
+
+
+class ReviewRating(models.Model):
+    user = models.ForeignKey('accounts.Account', on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    subject = models.CharField(max_length=100, blank=True)
+    review = models.TextField(max_length=500, blank=True)
+    rating = models.FloatField()
+    ip = models.CharField(max_length=20, blank=True)
+    status = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.subject

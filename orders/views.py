@@ -87,62 +87,62 @@ def place_order(request, total=0, quantity=0):
 def payment_successful(request, order_number):
     order = Order.objects.get(order_number=order_number)
 
-    # payment = Payment.objects.create(
-    #     user=order.user,
-    #     payment_id=order_number,
-    #     payment_method='paypal',
-    #     amount_paid=order.grand_total,
-    #     status='Completed')
-    # payment.save()
-    # order_payment = get_object_or_404(Payment, payment_id=order_number)
-    # order.is_ordered = True
-    # order.payment = order_payment
-    # order.save()
-    # # Temporary code!
-    # # Create OrderProduct
-    # cart_items = CartItem.objects.filter(user=request.user)
-    #
-    # for item in cart_items:
-    #     #     order_product = OrderProduct()
-    #     #     order_product.order_id = order.id
-    #     #     order_product.payment = order_payment
-    #     #     order_product.user_id = request.user.id
-    #     #     order_product.quantity = item.quantity
-    #     #     order_product.product_price = item.price
-    #     #     order_product.is_ordered = True
-    #     #     order_product.save()
-    #
-    #     ordered_products = OrderProduct.objects.create(
-    #         order=order,
-    #         payment=order_payment,
-    #         user=request.user,
-    #         product=item.product,
-    #         quantity=item.quantity,
-    #         product_price=item.product.price,
-    #         is_ordered=True
-    #     )
-    #     ordered_products.save()
-    #     # Update Variations
-    #     cart_item = CartItem.objects.get(id=item.id)
-    #     item_variations = cart_item.variations.all()
-    #     ordered_products = OrderProduct.objects.get(id=ordered_products.id)
-    #     ordered_products.variation.set(item_variations)
-    #     ordered_products.save()
-    #     # Reduce the quantity of carts
-    #     product = Product.objects.get(id=cart_item.product.id)
-    #     product.stock = product.stock-cart_item.quantity
-    #     product.save()
-    # # Delete Carts
-    # cart_items.delete()
-    # # Send order received email to customers
-    # mail_subject = "GreatKart: Order Received Email"
-    # message = render_to_string('orders/order_received_email.html', {
-    #     'user': request.user,
-    #     'order': order,
-    # })
-    # to_email = order.user.email
-    # send_email = EmailMessage(mail_subject, message, to=[to_email])
-    # send_email.send()
+    payment = Payment.objects.create(
+        user=order.user,
+        payment_id=order_number,
+        payment_method='paypal',
+        amount_paid=order.grand_total,
+        status='Completed')
+    payment.save()
+    order_payment = get_object_or_404(Payment, payment_id=order_number)
+    order.is_ordered = True
+    order.payment = order_payment
+    order.save()
+    # Temporary code!
+    # Create OrderProduct
+    cart_items = CartItem.objects.filter(user=request.user)
+
+    for item in cart_items:
+        #     order_product = OrderProduct()
+        #     order_product.order_id = order.id
+        #     order_product.payment = order_payment
+        #     order_product.user_id = request.user.id
+        #     order_product.quantity = item.quantity
+        #     order_product.product_price = item.price
+        #     order_product.is_ordered = True
+        #     order_product.save()
+
+        ordered_products = OrderProduct.objects.create(
+            order=order,
+            payment=order_payment,
+            user=request.user,
+            product=item.product,
+            quantity=item.quantity,
+            product_price=item.product.price,
+            is_ordered=True
+        )
+        ordered_products.save()
+        # Update Variations
+        cart_item = CartItem.objects.get(id=item.id)
+        item_variations = cart_item.variations.all()
+        ordered_products = OrderProduct.objects.get(id=ordered_products.id)
+        ordered_products.variation.set(item_variations)
+        ordered_products.save()
+        # Reduce the quantity of carts
+        product = Product.objects.get(id=cart_item.product.id)
+        product.stock = product.stock-cart_item.quantity
+        product.save()
+    # Delete Carts
+    cart_items.delete()
+    # Send order received email to customers
+    mail_subject = "GreatKart: Order Received Email"
+    message = render_to_string('orders/order_received_email.html', {
+        'user': request.user,
+        'order': order,
+    })
+    to_email = order.user.email
+    send_email = EmailMessage(mail_subject, message, to=[to_email])
+    send_email.send()
     ordered_items = OrderProduct.objects.filter(order__id=order.id)
     print(ordered_items)
     context = {'order': order, 'items': ordered_items}
